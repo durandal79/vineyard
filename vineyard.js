@@ -1,4 +1,4 @@
-var MetaHub = require('metahub');var Ground = require('ground');when = require('when');var __extends = this.__extends || function (d, b) {
+var MetaHub = require('vineyard-metahub');var Ground = require('vineyard-ground');when = require('when');var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -39,8 +39,15 @@ var Vineyard = (function () {
         if (info.path) {
             var path = require('path');
             file = path.resolve(info.path);
-        } else
+        } else {
             file = info.parent || name;
+
+            try  {
+                require.resolve(file);
+            } catch (e) {
+                file = 'vineyard-' + file;
+            }
+        }
 
         var bulb_class = require(file);
         if (info.class)
@@ -48,6 +55,9 @@ var Vineyard = (function () {
 
         if (!bulb_class)
             throw new Error('Could not load bulb module: "' + name + '" (path=' + file + ').');
+
+        if (typeof bulb_class !== 'function')
+            throw new Error('bulb is not a class: "' + name + '" (path=' + file + ').');
 
         var bulb = new bulb_class(this, info);
         this.bulbs[name] = bulb;
